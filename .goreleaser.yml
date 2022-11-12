@@ -1,0 +1,54 @@
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - env:
+      - CGO_ENABLED=0
+    binary: pagerduty-broker
+    ldflags:
+      - -s -w -X github.com/zebbra/pagerduty-broker/internal/lib/version.Version={{.Version}} -X github.com/zebbra/pagerduty-broker/internal/lib/version.Commit={{.Commit}} -X github.com/zebbra/pagerduty-broker/internal/lib/version.Date={{.Date}}
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+archives:
+  - files:
+      - LICENSE
+      - README.md
+checksum:
+  name_template: 'checksums.txt'
+dockers:
+  - dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--pull"
+    image_templates:
+      - "ghcr.io/zebbra/pagerduty-broker:{{ .Tag }}-amd64"
+    goos: linux
+    goarch: amd64
+    ids:
+      - pagerduty-broker
+  - dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--pull"
+    image_templates:
+      - "ghcr.io/zebbra/pagerduty-broker:{{ .Tag }}-arm64"
+    goos: linux
+    goarch: arm64
+    ids:
+      - pagerduty-broker
+docker_manifests:
+  - name_template: ghcr.io/zebbra/pagerduty-broker:{{ .Tag }}
+    image_templates:
+      - "ghcr.io/zebbra/pagerduty-broker:{{ .Tag }}-amd64"
+      - "ghcr.io/zebbra/pagerduty-broker:{{ .Tag }}-arm64"
+  - name_template: ghcr.io/zebbra/pagerduty-broker:latest
+    image_templates:
+      - "ghcr.io/zebbra/pagerduty-broker:{{ .Tag }}-amd64"
+      - "ghcr.io/zebbra/pagerduty-broker:{{ .Tag }}-arm64"
+
